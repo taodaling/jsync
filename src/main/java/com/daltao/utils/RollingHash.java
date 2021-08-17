@@ -28,10 +28,12 @@ public class RollingHash {
 
     public void addLast(int x) {
         hash = (int) ((hash + (long) x * hd.xp[size]) % hd.mod);
+        size++;
     }
 
     public void addFirst(int x) {
         hash = (int) (((long) hash * hd.x + x) % hd.mod);
+        size++;
     }
 
     public void removeLast(int x) {
@@ -39,6 +41,7 @@ public class RollingHash {
         if (hash < 0) {
             hash += hd.mod;
         }
+        size--;
     }
 
     public void removeFirst(int x) {
@@ -46,5 +49,6 @@ public class RollingHash {
         if(hash < 0){
             hash += hd.mod;
         }
+        size--;
     }
 }

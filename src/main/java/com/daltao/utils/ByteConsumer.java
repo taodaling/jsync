@@ -1,5 +1,5 @@
 package com.daltao.utils;
 
 public interface ByteConsumer {
-    public void consume(byte b);
+    void consume(byte b) throws Exception;
 }
