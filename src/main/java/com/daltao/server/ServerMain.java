@@ -39,20 +39,20 @@ public class ServerMain {
             throw new IllegalStateException("Different api version between server and client");
         }
 
-//        int p = Constant.PRIME;
-//        int x = ThreadLocalRandom.current().nextInt(p);
-//        int y = ThreadLocalRandom.current().nextInt(p);
-        long x = BigInteger.probablePrime(60, ThreadLocalRandom.current()).longValue();
+        int p = Constant.PRIME;
+        int x = ThreadLocalRandom.current().nextInt(p);
+        int y = ThreadLocalRandom.current().nextInt(p);
+//        long x = BigInteger.probablePrime(60, ThreadLocalRandom.current()).longValue();
         os.writeInt(config.block);
-        os.writeLong(x);
-//        os.writeInt(p);
-//        os.writeInt(x);
-//        os.writeInt(y);
+//        os.writeLong(x);
+        os.writeInt(p);
+        os.writeInt(x);
+        os.writeInt(y);
         os.flush();
 
-//        HashDeque dq = new RollingHashDeque(new RollingHash(new HashData(x, p, config.block)),
-//                new RollingHash(new HashData(y, p, config.block)), config.block);
-        HashDeque dq = new FastRollingHashDeque(new FastRollingHash(new FastHashData(x, config.block)), config.block);
+        HashDeque dq = new RollingHashDeque(new RollingHash(new HashData(x, p, config.block)),
+                new RollingHash(new HashData(y, p, config.block)), config.block);
+//        HashDeque dq = new FastRollingHashDeque(new FastRollingHash(new FastHashData(x, config.block)), config.block);
         String remote = is.readUTF();
         File directory = new File(config.root + remote).getCanonicalFile();
         if (!directory.exists() || !directory.isDirectory() || !FileUtils.under(root, directory)) {
@@ -63,7 +63,7 @@ public class ServerMain {
         os = new DataOutputStream(AESUtils.encrypt(config.pwd, new BufferedOutputStream(socket.getOutputStream())));
         DeltaChannel.of(summaryList, config.block, dq).write(os, directory);
         os.flush();
-        os.close();
+//        os.close();
 
         if (!"done".equals(is.readUTF())) {
             throw new IllegalStateException("jsync failed because of unknown reason");

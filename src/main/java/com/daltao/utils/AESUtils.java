@@ -52,12 +52,12 @@ public class AESUtils {
     }
 
     public static OutputStream encrypt(String pwd, OutputStream os) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
-//        return os;
-        return new NotCloseCipherOutputStream(os, create(pwd, true));
+        return os;
+//        return new NotCloseCipherOutputStream(os, create(pwd, true));
     }
 
     public static InputStream decrypt(String pwd, InputStream is) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
-//        return is;
-        return new CipherInputStream(is, create(pwd, false));
+        return is;
+//        return new CipherInputStream(is, create(pwd, false));
     }
 }

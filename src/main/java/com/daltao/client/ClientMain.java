@@ -64,15 +64,15 @@ public class ClientMain {
         }
 
         config.block = is.readInt();
-//        int p = is.readInt();
-//        int x = is.readInt();
-//        int y = is.readInt();
-        long x = is.readLong();
-        HashDeque dq = new FastRollingHashDeque(new FastRollingHash(new FastHashData(x, config.block)), config.block);
+        int p = is.readInt();
+        int x = is.readInt();
+        int y = is.readInt();
+//        long x = is.readLong();
+//        HashDeque dq = new FastRollingHashDeque(new FastRollingHash(new FastHashData(x, config.block)), config.block);
 
         System.err.println("summarize...");
-//        RollingHashDeque dq = new RollingHashDeque(new RollingHash(new HashData(x, p, config.block)),
-//                new RollingHash(new HashData(y, p, config.block)), config.block);
+        RollingHashDeque dq = new RollingHashDeque(new RollingHash(new HashData(x, p, config.block)),
+                new RollingHash(new HashData(y, p, config.block)), config.block);
         List<SummaryClient> summaryList = new CalculateLocalSummary(root, config.block, dq)
                 .setCallback(new CalculateLocalSummary.Callback() {
                     @Override

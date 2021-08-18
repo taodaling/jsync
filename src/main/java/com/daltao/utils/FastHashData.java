@@ -10,7 +10,7 @@ public class FastHashData {
 
     public FastHashData(long x, int n){
         this.x = x;
-        invx = BigInteger.valueOf(x).modInverse(BigInteger.valueOf(Long.MIN_VALUE).negate()).intValue();
+        invx = BigInteger.valueOf(x).modInverse(BigInteger.valueOf(1).shiftLeft(64).negate()).longValue();
         xp = new long[n + 10];
         invxp = new long[n + 10];
         xp[0] = 1;
