@@ -7,7 +7,6 @@ import com.daltao.dto.Summary;
 import com.daltao.utils.*;
 
 import java.io.*;
-import java.math.BigInteger;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -40,8 +39,8 @@ public class ServerMain {
         }
 
         int p = Constant.PRIME;
-        int x = ThreadLocalRandom.current().nextInt(p);
-        int y = ThreadLocalRandom.current().nextInt(p);
+        int x = ThreadLocalRandom.current().nextInt(p - 1) + 1;
+        int y = ThreadLocalRandom.current().nextInt(p - 1) + 1;
 //        long x = BigInteger.probablePrime(60, ThreadLocalRandom.current()).longValue();
         os.writeInt(config.block);
 //        os.writeLong(x);
@@ -78,6 +77,7 @@ public class ServerMain {
         while (true) {
             Socket target = socket.accept();
             target.setKeepAlive(true);
+            target.setSoTimeout(Integer.MAX_VALUE);
             new Thread(() -> {
                 try {
                     handleSocket(target);
