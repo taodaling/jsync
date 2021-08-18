@@ -3,6 +3,7 @@ package com.daltao.client;
 import com.daltao.dto.SummaryClient;
 import com.daltao.utils.FileUtils;
 import com.daltao.utils.FileVisitor;
+import com.daltao.utils.HashDeque;
 import com.daltao.utils.RollingHashDeque;
 
 import java.io.File;
@@ -12,12 +13,39 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 public class CalculateLocalSummary implements Callable<List<SummaryClient>> {
+    public static interface Callback {
+        void begin(File file);
+        void end(File file);
+        void process(long offset);
+    }
+
     int block;
     byte[] buf = new byte[1 << 13];
-    RollingHashDeque dq;
+    HashDeque dq;
     File root;
+    Callback cb = new Callback() {
+        @Override
+        public void begin(File file) {
 
-    public CalculateLocalSummary(File root, int block, RollingHashDeque dq) {
+        }
+
+        @Override
+        public void end(File file) {
+
+        }
+
+        @Override
+        public void process(long offset) {
+
+        }
+    };
+
+    public CalculateLocalSummary setCallback(Callback cb){
+        this.cb = cb;
+        return this;
+    }
+
+    public CalculateLocalSummary(File root, int block, HashDeque dq) {
         this.root = root;
         this.block = block;
         this.dq = dq;
@@ -41,7 +69,9 @@ public class CalculateLocalSummary implements Callable<List<SummaryClient>> {
 
             @Override
             public void visitFile(File file) throws Exception {
+                cb.begin(file);
                 singleFile(file);
+                cb.end(file);
             }
         });
         return summaries;
@@ -62,6 +92,8 @@ public class CalculateLocalSummary implements Callable<List<SummaryClient>> {
         s.file = file;
         dq.clear();
         summaries.add(s);
+
+        cb.process(curOffset);
     }
 
     private void singleFile(File file) throws Exception {

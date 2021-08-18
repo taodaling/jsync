@@ -7,10 +7,12 @@ import com.daltao.dto.Summary;
 import com.daltao.utils.*;
 
 import java.io.*;
+import java.math.BigInteger;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class ServerMain {
     Config config = new Config();
@@ -37,17 +39,20 @@ public class ServerMain {
             throw new IllegalStateException("Different api version between server and client");
         }
 
-        int p = Constant.PRIME;
-        int x = 1;//ThreadLocalRandom.current().nextInt(p);
-        int y = 2;//ThreadLocalRandom.current().nextInt(p);
+//        int p = Constant.PRIME;
+//        int x = ThreadLocalRandom.current().nextInt(p);
+//        int y = ThreadLocalRandom.current().nextInt(p);
+        long x = BigInteger.probablePrime(60, ThreadLocalRandom.current()).longValue();
         os.writeInt(config.block);
-        os.writeInt(p);
-        os.writeInt(x);
-        os.writeInt(y);
+        os.writeLong(x);
+//        os.writeInt(p);
+//        os.writeInt(x);
+//        os.writeInt(y);
         os.flush();
 
-        RollingHashDeque dq = new RollingHashDeque(new RollingHash(new HashData(x, p, config.block)),
-                new RollingHash(new HashData(y, p, config.block)), config.block);
+//        HashDeque dq = new RollingHashDeque(new RollingHash(new HashData(x, p, config.block)),
+//                new RollingHash(new HashData(y, p, config.block)), config.block);
+        HashDeque dq = new FastRollingHashDeque(new FastRollingHash(new FastHashData(x, config.block)), config.block);
         String remote = is.readUTF();
         File directory = new File(config.root + remote).getCanonicalFile();
         if (!directory.exists() || !directory.isDirectory() || !FileUtils.under(root, directory)) {

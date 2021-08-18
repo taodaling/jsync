@@ -20,7 +20,7 @@ public class HashData {
         invxp[0] = 1;
         for(int i = 1; i < xp.length; i++){
             xp[i] = (int) ((long)xp[i - 1] * x % mod);
-            invxp[i] = (int) ((long)invxp[i - 1] * x % mod);
+            invxp[i] = (int) ((long)invxp[i - 1] * invx % mod);
         }
     }
 }

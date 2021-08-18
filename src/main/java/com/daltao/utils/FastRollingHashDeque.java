@@ -4,47 +4,40 @@ import java.security.MessageDigest;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
-public class RollingHashDeque implements HashDeque {
+public class FastRollingHashDeque implements HashDeque {
     Deque<Byte> dq;
-    RollingHash rh1;
-    RollingHash rh2;
+    FastRollingHash rh;
     MessageDigest md;
 
-    public RollingHashDeque(RollingHash rh1, RollingHash rh2, int n) {
-        this.rh1 = rh1;
-        this.rh2 = rh2;
+    public FastRollingHashDeque(FastRollingHash rh, int n) {
+        this.rh = rh;
         dq = new ArrayDeque<>(n + 10);
     }
 
     public void clear(){
         dq.clear();
-        rh1.clear();
-        rh2.clear();
+        rh.clear();
     }
 
     public void addLast(byte x) {
         dq.addLast(x);
-        rh1.addLast(x);
-        rh2.addLast(x);
+        rh.addLast(x);
     }
 
     public byte removeLast() {
         byte ans = dq.removeLast();
-        rh1.removeLast(ans);
-        rh2.removeLast(ans);
+        rh.removeLast(ans);
         return ans;
     }
 
     public void addFirst(byte x) {
         dq.addFirst(x);
-        rh1.addFirst(x);
-        rh2.addFirst(x);
+        rh.addFirst(x);
     }
 
     public byte removeFirst() {
         byte ans = dq.removeFirst();
-        rh1.removeFirst(ans);
-        rh2.removeFirst(ans);
+        rh.removeFirst(ans);
         return ans;
     }
 
@@ -57,11 +50,11 @@ public class RollingHashDeque implements HashDeque {
     }
 
     public long hash() {
-        return IntegerUtils.mergeAsLong(rh1.hash(), rh2.hash());
+        return rh.hash();
     }
 
     public long hashV() {
-        return IntegerUtils.mergeAsLong(rh1.hashV(), rh2.hashV());
+        return rh.hashV();
     }
 
     public byte[] md5() {

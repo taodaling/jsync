@@ -9,5 +9,8 @@
         <module name="jsync" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="jsync" target="11" />
+    </bytecodeTargetLevel>
   </component>
 </project>

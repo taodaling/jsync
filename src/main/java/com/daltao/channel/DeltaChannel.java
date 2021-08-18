@@ -16,7 +16,7 @@ public class DeltaChannel {
     Map<SummaryKey, Summary> map;
     BloomFilter<Long> bf;
     int block;
-    RollingHashDeque dq;
+    HashDeque dq;
     byte[] buf;
     byte[] appendBytes = new byte[128];
     int appendBytesWpos;
@@ -24,9 +24,37 @@ public class DeltaChannel {
     List<SummaryClient> sc;
     FileCache fc;
 
+    public static interface Callback {
+        void begin(File file);
 
+        void end(File file);
 
-    private DeltaChannel(Map<SummaryKey, Summary> map, BloomFilter<Long> bf, int block, RollingHashDeque dq) {
+        void process(long write, long transfer);
+    }
+
+    Callback cb = new Callback() {
+        @Override
+        public void begin(File file) {
+
+        }
+
+        @Override
+        public void end(File file) {
+
+        }
+
+        @Override
+        public void process(long write, long transfer) {
+
+        }
+    };
+
+    public DeltaChannel setCallback(Callback cb) {
+        this.cb = cb;
+        return this;
+    }
+
+    private DeltaChannel(Map<SummaryKey, Summary> map, BloomFilter<Long> bf, int block, HashDeque dq) {
         this.map = map;
         this.bf = bf;
         this.block = block;
@@ -34,7 +62,7 @@ public class DeltaChannel {
         buf = new byte[block];
     }
 
-    public static DeltaChannel of(List<Summary> list, int block, RollingHashDeque dq) {
+    public static DeltaChannel of(List<Summary> list, int block, HashDeque dq) {
         BloomFilter<Long> bf = BloomFilter.create(Funnels.longFunnel(), list.size(), 1e-6);
         Map<SummaryKey, Summary> map = new HashMap<>(list.size());
         for (Summary s : list) {
@@ -68,7 +96,7 @@ public class DeltaChannel {
     }
 
     public void checkForReplacement(DataOutputStream dos) throws IOException {
-        if(dq.isEmpty()){
+        if (dq.isEmpty()) {
             return;
         }
         long hv = dq.hashV();
@@ -110,12 +138,12 @@ public class DeltaChannel {
                         append(dos, dq.removeFirst());
                     }
                     dq.addLast(b);
-                    if(dq.size() == block){
+                    if (dq.size() == block) {
                         checkForReplacement(dos);
                     }
                 });
                 checkForReplacement(dos);
-                while(!dq.isEmpty()){
+                while (!dq.isEmpty()) {
                     append(dos, dq.removeFirst());
                 }
                 flushAppendBytes(dos);
@@ -137,13 +165,16 @@ public class DeltaChannel {
         dfs(dis, file);
     }
 
-    public long totalSize;
-    public long actualTransfer;
+    public long totalWrite;
+    public long totalTransfer;
 
     private void generateFile(DataInputStream dis, File file) throws IOException {
         if (!file.createNewFile()) {
             throw new IllegalStateException();
         }
+        long localWrite = 0;
+        long localTransfer = 0;
+        cb.begin(file);
         try (BufferedOS fos = new BufferedOS(bufOS, new FileOutputStream(file))) {
             int cmd;
             while ((cmd = dis.readByte()) != FILE_END) {
@@ -151,8 +182,8 @@ public class DeltaChannel {
                     //add
                     dis.readNBytes(buf, 0, -cmd);
                     fos.write(buf, 0, -cmd);
-                    totalSize += -cmd;
-                    actualTransfer += -cmd + 1;
+                    localWrite += -cmd;
+                    localTransfer += -cmd + 1;
                 } else if (cmd == COPY) {
                     int id = dis.readInt();
                     SummaryClient summary = sc.get(id);
@@ -166,11 +197,16 @@ public class DeltaChannel {
                     is.seek(summary.offset);
                     is.readFully(buf, 0, summary.length);
                     fos.write(buf, 0, summary.length);
-                    totalSize += summary.length;
-                    actualTransfer += 5;
+                    localWrite += summary.length;
+                    localTransfer += 5;
                 }
+                cb.process(totalWrite, totalTransfer);
             }
         }
+
+        cb.end(file);
+        totalWrite += localWrite;
+        totalTransfer += localTransfer;
     }
 
     private void dfs(DataInputStream dis, File parent) throws Exception {
