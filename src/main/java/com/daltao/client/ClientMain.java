@@ -44,6 +44,7 @@ public class ClientMain {
 
         System.err.println("start jsync");
         Socket socket = new Socket();
+        socket.setKeepAlive(true);
         socket.connect(new InetSocketAddress(config.host, config.port));
         System.err.println("connection build successfully");
         DataInputStream is = new DataInputStream(new BufferedInputStream(socket.getInputStream()));

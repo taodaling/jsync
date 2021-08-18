@@ -62,7 +62,9 @@ public class ServerMain {
         List<Summary> summaryList = new SummaryChannel().read(is);
         os = new DataOutputStream(AESUtils.encrypt(config.pwd, new BufferedOutputStream(socket.getOutputStream())));
         DeltaChannel.of(summaryList, config.block, dq).write(os, directory);
+        os.flush();
         os.close();
+
         if (!"done".equals(is.readUTF())) {
             throw new IllegalStateException("jsync failed because of unknown reason");
         }
@@ -75,6 +77,7 @@ public class ServerMain {
         System.err.println("Server listening at port " + config.port);
         while (true) {
             Socket target = socket.accept();
+            target.setKeepAlive(true);
             new Thread(() -> {
                 try {
                     handleSocket(target);
