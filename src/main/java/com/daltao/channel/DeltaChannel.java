@@ -200,7 +200,7 @@ public class DeltaChannel {
                     localWrite += summary.length;
                     localTransfer += 5;
                 }
-                cb.process(totalWrite, totalTransfer);
+                cb.process(localWrite, localTransfer);
             }
         }
 
