@@ -63,7 +63,7 @@ public class Config {
             remote = properties.getProperty("remote");
         }
         if (properties.containsKey("host")) {
-            remote = properties.getProperty("host");
+            host = properties.getProperty("host");
         }
         if (properties.containsKey("block")) {
             block = Integer.parseInt(properties.getProperty("block"));
